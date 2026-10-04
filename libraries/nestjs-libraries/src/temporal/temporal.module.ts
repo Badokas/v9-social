@@ -1,6 +1,22 @@
 import { TemporalModule } from 'nestjs-temporal-core';
 import { socialIntegrationList } from '@gitroom/nestjs-libraries/integrations/integration.manager';
 
+// POSTIZ_ACTIVE_PROVIDERS: comma-separated allowlist of task-queue names to run
+// workers for (upstream PR #1651, for issue #1570). Unset => all providers
+// (backwards-compatible). Match is on the task queue, i.e. the identifier
+// BEFORE the first '-', so use `instagram` (not `instagram-standalone`),
+// `tiktok` (not `tiktok-business`), etc.
+function parseActiveProviders(): Set<string> | null {
+  const raw = process.env.POSTIZ_ACTIVE_PROVIDERS;
+  if (!raw || !raw.trim()) return null;
+  return new Set(
+    raw
+      .split(',')
+      .map((p) => p.trim().toLowerCase())
+      .filter(Boolean)
+  );
+}
+
 export const getTemporalModule = (
   isWorkers: boolean,
   path?: string,
@@ -22,6 +38,10 @@ export const getTemporalModule = (
     1,
     Number(process.env.WORKER_CONCURRENCY_DIVIDER) || 1
   );
+
+  // Providers this server should run workers for (comma-separated).
+  // Unset => all providers (backwards-compatible default).
+  const activeProviders = parseActiveProviders();
 
   return TemporalModule.register({
     isGlobal: true,
@@ -46,7 +66,13 @@ export const getTemporalModule = (
               integration,
               taskQueue: integration.identifier.split('-')[0],
             }))
-            .filter(({ taskQueue }) => !excludeQueues.includes(taskQueue))
+            .filter(
+              ({ taskQueue }) =>
+                !excludeQueues.includes(taskQueue) &&
+                (taskQueue === 'main' ||
+                  activeProviders === null ||
+                  activeProviders.has(taskQueue))
+            )
             .map(({ integration, taskQueue }) => {
               // Split the per-provider cap across the servers sharing this
               // queue. Floor (never below 1) so the global total never exceeds
