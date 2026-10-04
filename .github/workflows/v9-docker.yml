@@ -43,6 +43,7 @@ jobs:
           images: ghcr.io/badokas/v9-social
           tags: |
             type=raw,value=v9,enable=${{ github.ref == 'refs/heads/v9' }}
+            type=raw,value=latest,enable=${{ github.ref_type == 'tag' }}
             type=sha,format=short
             type=ref,event=tag
 
