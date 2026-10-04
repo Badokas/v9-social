@@ -55,3 +55,16 @@ Left enabled: `build.yml` (plain build check on push/PR).
 `.github/workflows/eslint` has no `.yml` extension, so GitHub ignores it.
 New upstream workflows show up enabled after a sync; check
 `gh workflow list -R Badokas/v9-social` and disable as needed.
+
+## Docker image
+
+`.github/workflows/v9-docker.yml` builds `Dockerfile.dev` (linux/amd64) and
+pushes `ghcr.io/badokas/v9-social` with tags:
+
+- `v9`: latest push to branch `v9`
+- `sha-<short>`: every build
+- `v<upstream>-v9.<n>`: release tags, e.g. `v2.25.0-v9.1`
+
+Release: `git tag v2.25.0-v9.1 && git push origin v2.25.0-v9.1`.
+Make the GHCR package public once in the GitHub UI (package settings).
+Keep `build-containers.yml` disabled: it fires on every tag.
