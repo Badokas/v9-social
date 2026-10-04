@@ -68,24 +68,31 @@ pushes `ghcr.io/badokas/v9-social` with tags:
 Release: `git tag v2.25.0-v9.1 && git push origin v2.25.0-v9.1`.
 Make the GHCR package public once in the GitHub UI (package settings).
 Keep `build-containers.yml` disabled: it fires on every tag.
+
 ## TikTok patches
+
 `tiktok:` commits implement TikTok's
 [Direct Post UX guidelines](https://developers.tiktok.com/doc/content-sharing-guidelines)
 for the legacy `tiktok` provider. `tiktok-business` shares the composer, so it
 also gets no privacy default, unchecked interactions and the new
 labels/declaration, but no creator_info, blocking or Direct Post-only.
+
 Scopes: `user.info.basic`, `user.info.profile` (username for release URLs),
 `video.publish` (creator_info, Direct Post init, publish status/release URL).
 Dropped, with consequences:
+
 - `video.upload`: UPLOAD (send to TikTok inbox) is rejected for `tiktok`.
 - `user.info.stats`, `video.list`: TikTok `analytics()`, `postAnalytics()`
   and `missing()` return empty (verified they degrade to `[]`, no
   refresh/disconnect).
+
 Behavior: creator_info is shown in the composer and re-checked before each
 publish; no `PUBLIC_TO_EVERYONE` fallback; `/posts/valid` rejects missing
 privacy, disclosure without a brand choice, branded + `SELF_ONLY`, UPLOAD and
 the composer's `publish_blocked_reason` (can't post now, video too long).
+
 Files touched (where rebase conflicts land):
+
 - `libraries/nestjs-libraries/src/integrations/social/tiktok.provider.ts`
 - `libraries/nestjs-libraries/src/dtos/posts/providers-settings/tiktok.dto.ts`
 - `apps/frontend/src/components/new-launch/providers/tiktok/tiktok.provider.tsx`
