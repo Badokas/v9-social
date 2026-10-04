@@ -33,6 +33,7 @@ import { ChannelsAfterPayment } from '@gitroom/frontend/components/layout/check.
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
 import { Input } from '@gitroom/react/form/input';
 import { Button } from '@gitroom/react/form/button';
+import { PoweredByComponent } from '@gitroom/frontend/components/ui/powered.by.component';
 
 export const SVGLine = () => {
   return (
@@ -752,6 +753,7 @@ export const LaunchesComponent = () => {
                   ? process.env.NEXT_PUBLIC_VERSION
                   : ''}
               </div>
+              <PoweredByComponent />
             </div>
           </div>
         </div>
