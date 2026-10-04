@@ -6,7 +6,7 @@ Branch `v9` = an upstream release tag + a small patch stack on top.
 - `origin`   → https://github.com/Badokas/v9-social (default branch `v9`)
 - `upstream` → https://github.com/gitroomhq/postiz-app
 - Current base: `v2.25.0` (update this line on every rebase)
-- Current release tag: `v2.25.0-v9.3` (bump `-v9.<n>` on every build)
+- Current release tag: `v2.25.0-v9.5` (bump `-v9.<n>` on every build)
 
 ## Updating to a new upstream release
 
@@ -151,6 +151,9 @@ Behavior: creator_info is shown in the composer and re-checked before each
 publish; no `PUBLIC_TO_EVERYONE` fallback; `/posts/valid` rejects missing
 privacy, disclosure without a brand choice, branded + `SELF_ONLY`, UPLOAD and
 the composer's `publish_blocked_reason` (can't post now, video too long).
+Duet / Stitch / AI label are hidden (not unmounted) for photo posts, and
+`duet` / `stitch` are `@IsOptional` in the DTO, so photo posts don't fail
+with "duet must be a boolean value".
 
 Files touched (where rebase conflicts land):
 
