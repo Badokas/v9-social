@@ -88,6 +88,8 @@ module.exports = {
         btnSimple: 'var(--new-btn-simple)',
         btnText: 'var(--new-btn-text)',
         btnPrimary: 'var(--new-btn-primary)',
+        // V9 brand accent; channel form enables opacity modifiers (bg-brand/50 etc.)
+        brand: 'rgb(var(--new-btn-primary-rgb) / <alpha-value>)',
         ai: 'var(--new-ai-btn)',
         boxHover: 'var(--new-box-hover)',
         newTableBorder: 'var(--new-table-border)',
