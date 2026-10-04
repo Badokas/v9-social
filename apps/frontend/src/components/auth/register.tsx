@@ -24,6 +24,11 @@ import dynamic from 'next/dynamic';
 import { WalletUiProvider } from '@gitroom/frontend/components/auth/providers/placeholder/wallet.ui.provider';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import useCookie from 'react-use-cookie';
+// V9 Social: set to true to show the "Continue With" social/OAuth buttons again.
+const V9_SOCIAL_LOGIN = false;
+// V9 Social: our own legal pages (must be public, same domain as the app for TikTok review).
+const V9_TERMS_URL = '/terms';
+const V9_PRIVACY_URL = '/privacy';
 const WalletProvider = dynamic(
   () => import('@gitroom/frontend/components/auth/providers/wallet.provider'),
   {
@@ -162,11 +167,19 @@ export function RegisterAfter({
               {t('sign_up', 'Sign Up')}
             </h1>
           </div>
-          <div className="text-[14px] mt-[32px] mb-[12px]">
-            {t('continue_with', 'Continue With')}
-          </div>
-          <div className="flex flex-col text-[14px]">
-            {!isAfterProvider &&
+          {/* V9 Social: email/password only, social login hidden */}
+          {V9_SOCIAL_LOGIN && (
+            <div className="text-[14px] mt-[32px] mb-[12px]">
+              {t('continue_with', 'Continue With')}
+            </div>
+          )}
+          <div
+            className={`flex flex-col text-[14px] ${
+              V9_SOCIAL_LOGIN ? '' : 'mt-[32px]'
+            }`}
+          >
+            {V9_SOCIAL_LOGIN &&
+              !isAfterProvider &&
               (!isGeneral ? (
                 <GithubProvider />
               ) : (
@@ -181,7 +194,7 @@ export function RegisterAfter({
                   {billingEnabled && <WalletProvider />}
                 </div>
               ))}
-            {!isAfterProvider && (
+            {V9_SOCIAL_LOGIN && !isAfterProvider && (
               <div className="h-[20px] mb-[24px] mt-[24px] relative">
                 <div className="absolute w-full h-[1px] bg-fifth top-[50%] -translate-y-[50%]" />
                 <div
@@ -228,17 +241,19 @@ export function RegisterAfter({
                 )}
                 &nbsp;
                 <a
-                  href={`https://postiz.com/terms`}
+                  href={V9_TERMS_URL}
+                  target="_blank"
                   className="underline hover:font-bold"
-                  rel="nofollow"
+                  rel="noopener"
                 >
                   {t('terms_of_service', 'Terms of Service')}
                 </a>
                 &nbsp;
                 {t('and', 'and')}&nbsp;
                 <a
-                  href={`https://postiz.com/privacy`}
-                  rel="nofollow"
+                  href={V9_PRIVACY_URL}
+                  target="_blank"
+                  rel="noopener"
                   className="underline hover:font-bold"
                 >
                   {t('privacy_policy', 'Privacy Policy')}
