@@ -67,7 +67,9 @@ export class TikTokLocation {
 // music / location are TikTok Business only: the legacy TikTok provider ignores
 // them (its Content Posting API has no music_sound_info / location fields).
 // Fields stay required here (existing clients depend on it); the constraints are
-// documented, not enforced. The one exception is privacy_level, which is only
+// documented, not enforced. The video-only booleans (duet / stitch /
+// video_made_with_ai) are optional: the composer doesn't show them for photos
+// and the providers treat a missing value as false. privacy_level is only
 // required on DIRECT_POST: TikTok's audit UX guidelines demand the user picks it
 // manually (no preselected default), so the composer starts it empty and UPLOAD
 // posts must not be blocked by it.
@@ -102,6 +104,7 @@ export class TikTokDto {
     | 'SELF_ONLY';
 
   @IsBoolean()
+  @IsOptional()
   @JSONSchema({
     description:
       'Video posts only, and only when content_posting_method=DIRECT_POST. TikTok has no duet setting for photo posts.',
@@ -109,6 +112,7 @@ export class TikTokDto {
   duet: boolean;
 
   @IsBoolean()
+  @IsOptional()
   @JSONSchema({
     description:
       'Video posts only, and only when content_posting_method=DIRECT_POST. TikTok has no stitch setting for photo posts.',

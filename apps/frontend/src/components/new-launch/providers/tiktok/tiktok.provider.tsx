@@ -486,41 +486,41 @@ const TikTokSettings: FC<{
           </div>
         )}
         {/* Duet, Stitch and the AI label don't exist for TikTok photo posts:
-            photos show only Allow Comment. */}
-        {!isPhoto && (
-          <>
-            <hr className="mb-[15px] border-tableBorder" />
-            <div className="text-[14px] mb-[10px]">
-              {t('tiktok_video_features', 'Video features')}
-            </div>
-            <div className="flex gap-[40px]">
-              <Checkbox
-                variant="hollow"
-                label={t('label_duet', 'Allow Duet')}
-                disabled={isUploadMode || !!creatorOk?.duetDisabled}
-                {...register('duet', {
-                  value: false,
-                })}
-              />
-              <Checkbox
-                label={t('label_stitch', 'Allow Stitch')}
-                variant="hollow"
-                disabled={isUploadMode || !!creatorOk?.stitchDisabled}
-                {...register('stitch', {
-                  value: false,
-                })}
-              />
-              <Checkbox
-                label={t('video_made_with_ai', 'Video made with AI')}
-                variant="hollow"
-                disabled={isUploadMode}
-                {...register('video_made_with_ai', {
-                  value: false,
-                })}
-              />
-            </div>
-          </>
-        )}
+            photos show only Allow Comment. The checkboxes stay mounted (just
+            hidden) so their boolean defaults are still registered - an
+            unmounted field is undefined and fails TikTokDto's @IsBoolean. */}
+        <div className={clsx(isPhoto && 'invisible h-0 overflow-hidden')}>
+          <hr className="mb-[15px] border-tableBorder" />
+          <div className="text-[14px] mb-[10px]">
+            {t('tiktok_video_features', 'Video features')}
+          </div>
+          <div className="flex gap-[40px]">
+            <Checkbox
+              variant="hollow"
+              label={t('label_duet', 'Allow Duet')}
+              disabled={isUploadMode || !!creatorOk?.duetDisabled}
+              {...register('duet', {
+                value: false,
+              })}
+            />
+            <Checkbox
+              label={t('label_stitch', 'Allow Stitch')}
+              variant="hollow"
+              disabled={isUploadMode || !!creatorOk?.stitchDisabled}
+              {...register('stitch', {
+                value: false,
+              })}
+            />
+            <Checkbox
+              label={t('video_made_with_ai', 'Video made with AI')}
+              variant="hollow"
+              disabled={isUploadMode}
+              {...register('video_made_with_ai', {
+                value: false,
+              })}
+            />
+          </div>
+        </div>
         <hr className="my-[15px] mb-[25px] border-tableBorder" />
         <div className="flex flex-col gap-[20px]">
           <Checkbox
