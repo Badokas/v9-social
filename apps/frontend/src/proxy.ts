@@ -48,6 +48,8 @@ export async function proxy(request: NextRequest) {
     nextUrl.pathname.startsWith('/p/') ||
     nextUrl.pathname.startsWith('/provider/') ||
     nextUrl.pathname.startsWith('/icons/') ||
+    // V9 Social: brand assets (logo on the public /p/ preview page)
+    nextUrl.pathname.startsWith('/v9social/') ||
     // V9 Social: public legal pages
     nextUrl.pathname === '/terms' ||
     nextUrl.pathname === '/privacy' ||
