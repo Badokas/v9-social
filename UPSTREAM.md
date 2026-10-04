@@ -39,7 +39,10 @@ Rules to keep merges cheap:
 
 ## Upstream workflows disabled on the fork
 
-Disabled via `gh workflow disable -R Badokas/v9-social` (files left untouched):
+Disable with `gh workflow disable <file> -R Badokas/v9-social` (files left
+untouched). GitHub only registers a workflow after its first trigger fires
+(scheduled ones within ~10–30 min of the push), so disable each once it shows
+up in `gh workflow list`:
 
 - `build-containers.yml` (pushes to `ghcr.io/gitroomhq`, triggers on any tag)
 - `build-extension.yaml`, `publish-extension.yml` (upstream extension secrets)
