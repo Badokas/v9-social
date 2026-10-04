@@ -3,6 +3,7 @@ import { getT } from '@gitroom/react/translation/get.translation.service.backend
 export const dynamic = 'force-dynamic';
 import { ReactNode } from 'react';
 import loadDynamic from 'next/dynamic';
+import { TestimonialComponent } from '@gitroom/frontend/components/auth/testimonial.component';
 import { LogoTextComponent } from '@gitroom/frontend/components/ui/logo-text.component';
 import { PoweredByComponent } from '@gitroom/frontend/components/ui/powered.by.component';
 import { MantineWrapper } from '@gitroom/react/helpers/mantine.wrapper';
@@ -34,6 +35,7 @@ export default async function AuthLayout({
             <br />
             {t('v9_auth_tagline_2', 'with V9 Social')}
           </div>
+          <TestimonialComponent />
         </div>
       </div>
     </MantineWrapper>
