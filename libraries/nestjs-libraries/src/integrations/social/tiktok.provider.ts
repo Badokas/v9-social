@@ -22,12 +22,13 @@ import { createReadStream } from 'fs';
 import { getSsrfSafeDispatcher } from '@gitroom/nestjs-libraries/dtos/webhooks/ssrf.safe.dispatcher';
 import { Integration } from '@prisma/client';
 import { Rules } from '@gitroom/nestjs-libraries/chat/rules.description.decorator';
+import { Tool } from '@gitroom/nestjs-libraries/integrations/tool.decorator';
 
 @Rules(
   [
     'TikTok can have one video or one picture or multiple pictures, it cannot be without an attachment.',
-    'content_posting_method=DIRECT_POST publishes the post to the account. content_posting_method=UPLOAD does NOT publish: it only sends the media to the user inbox of the TikTok app, where the user must manually complete and publish it within 24 hours or it is discarded. Use DIRECT_POST unless the user explicitly asks to review or edit the post inside the TikTok app first.',
-    'With content_posting_method=UPLOAD, TikTok ignores every setting except the title / post content. Never tell the user that video_made_with_ai, privacy_level, duet, stitch, comment, autoAddMusic, brand_content_toggle or brand_organic_toggle will be applied in UPLOAD mode - they are silently discarded. If the user asks for any of those settings, tell them it requires DIRECT_POST.',
+    'Only content_posting_method=DIRECT_POST is available for this channel (UPLOAD to the TikTok inbox is rejected).',
+    'privacy_level has no default: ask the user who can see the post (PUBLIC_TO_EVERYONE, MUTUAL_FOLLOW_FRIENDS, FOLLOWER_OF_CREATOR or SELF_ONLY) and never pick it for them. Branded content (brand_content_toggle) cannot be SELF_ONLY.',
     'video_made_with_ai, duet and stitch apply to video posts only. TikTok has no equivalent field for photo posts, so those settings are discarded when the attachment is a picture.',
   ].join(' ')
 )
@@ -36,14 +37,14 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
   name = 'Tiktok';
   isBetweenSteps = false;
   convertToJPEG = true;
-  scopes = [
-    'video.list',
-    'user.info.basic',
-    'video.publish',
-    'video.upload',
-    'user.info.profile',
-    'user.info.stats',
-  ];
+  // Minimal scopes for Direct Post (TikTok app review asks for the least we use):
+  // - video.publish: creator_info/query, video/init + content/init (DIRECT_POST)
+  //   and post/publish/status/fetch (release URL), so video.list isn't needed.
+  // - user.info.profile: `username`, used as the profile in release URLs.
+  // Dropped: video.upload (UPLOAD / inbox only, disabled here), user.info.stats
+  // and video.list (only analytics()/postAnalytics()/missing(), which now
+  // return [] - see UPSTREAM.md "TikTok patches").
+  scopes = ['user.info.basic', 'user.info.profile', 'video.publish'];
   override maxConcurrentJob = 10000;
   dto = TikTokDto;
   editor = 'normal' as const;
@@ -52,6 +53,43 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
   }
 
   override async checkValidity(
+    items: Array<ValidityMedia[]>,
+    settings?: any,
+    additionalSettings?: any[]
+  ): Promise<string | true> {
+    const media = await this.checkMediaValidity(items);
+    if (media !== true) {
+      return media;
+    }
+
+    // TikTok Direct Post UX rules (content-sharing-guidelines), enforced here
+    // so the composer toast, the public API and MCP all get the same answer.
+    if (settings?.content_posting_method === 'UPLOAD') {
+      return 'Upload to TikTok inbox is not available, please use Direct Post';
+    }
+    if (!settings?.privacy_level) {
+      return 'Choose who can see this post (privacy level)';
+    }
+    const brandOrganic = this.assetBoolean(settings?.brand_organic_toggle);
+    const brandContent = this.assetBoolean(settings?.brand_content_toggle);
+    if (this.assetBoolean(settings?.disclose) && !brandOrganic && !brandContent) {
+      return 'You need to indicate if your content promotes yourself, a third party, or both.';
+    }
+    if (brandContent && settings?.privacy_level === 'SELF_ONLY') {
+      return 'Branded content visibility cannot be set to private.';
+    }
+    // Set by the composer from creator_info (can't post now, video too long,
+    // still loading). Not in the DTO, like `disclose`.
+    if (
+      typeof settings?.publish_blocked_reason === 'string' &&
+      settings.publish_blocked_reason
+    ) {
+      return settings.publish_blocked_reason;
+    }
+    return true;
+  }
+
+  private async checkMediaValidity(
     items: Array<ValidityMedia[]>
   ): Promise<string | true> {
     const [firstItems] = items ?? [];
@@ -239,7 +277,7 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
       return {
         type: 'bad-body' as const,
         value:
-          'You have to upload the picture/video to Postiz when sending a URL',
+          'You have to upload the picture/video to the media library when sending a URL',
       };
     }
 
@@ -417,11 +455,25 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
     };
   }
 
-  async maxVideoLength(accessToken: string) {
-    const {
-      data: { max_video_post_duration_sec },
-    } = await (
-      await fetch(
+  // Required by TikTok before rendering the composer and before every Direct
+  // Post. Plain fetch on purpose: this.fetch maps reached_active_user_cap to
+  // Disconnect, and /integrations/function would disconnect the channel just
+  // because the composer opened. "Can't post now" comes back as HTTP 200 with
+  // error.code spam_risk_too_many_posts / spam_risk_user_banned_from_posting /
+  // reached_active_user_cap; 429/5xx/network errors are flagged `transient`.
+  @Tool({
+    description:
+      'TikTok creator info for the composer: nickname, avatar, allowed privacy levels, disabled interactions, max video duration, and whether the account can post now',
+    dataSchema: [],
+  })
+  async creatorInfo(accessToken: string) {
+    const unavailable =
+      'Could not load your TikTok account info, please try again later';
+
+    let status = 0;
+    let body = '{}';
+    try {
+      const response = await fetch(
         'https://open.tiktokapis.com/v2/post/publish/creator_info/query/',
         {
           method: 'POST',
@@ -430,11 +482,51 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
             Authorization: `Bearer ${accessToken}`,
           },
         }
-      )
-    ).json();
+      );
+      status = response.status;
+      body = (await response.text()) || '{}';
+    } catch (err) {
+      return { canPost: false, transient: true, message: unavailable };
+    }
 
+    if (
+      body.indexOf('access_token_invalid') > -1 ||
+      (status === 401 && body.indexOf('scope_not_authorized') === -1)
+    ) {
+      throw new RefreshToken('tiktok', body, '{}', 'Access token invalid');
+    }
+
+    let json: any = {};
+    try {
+      json = JSON.parse(body);
+    } catch (err) {
+      json = {};
+    }
+
+    const code = json?.error?.code;
+    if (status < 200 || status > 299 || (code && code !== 'ok')) {
+      return {
+        canPost: false,
+        transient: status === 429 || status >= 500,
+        code,
+        message:
+          this.handleErrors(body)?.value ||
+          json?.error?.message ||
+          'TikTok says this account cannot post right now, please try again later',
+      };
+    }
+
+    const data = json?.data || {};
     return {
-      maxDurationSeconds: max_video_post_duration_sec,
+      canPost: true,
+      nickname: data.creator_nickname,
+      username: data.creator_username,
+      avatar: data.creator_avatar_url,
+      privacyLevelOptions: data.privacy_level_options || [],
+      commentDisabled: !!data.comment_disabled,
+      duetDisabled: !!data.duet_disabled,
+      stitchDisabled: !!data.stitch_disabled,
+      maxVideoPostDurationSec: data.max_video_post_duration_sec,
     };
   }
 
@@ -564,6 +656,16 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
     const method = this.contentPostingMethod(firstPost);
 
     if (method === 'DIRECT_POST') {
+      // TikTok requires the user to pick the privacy level, never a default
+      if (!firstPost.settings.privacy_level) {
+        throw new BadBody(
+          'tiktok-error-upload',
+          '{}',
+          '{}',
+          'Choose who can see this TikTok post (privacy level) before publishing'
+        );
+      }
+
       return {
         post_info: {
           ...(isPhoto && firstPost.settings.title
@@ -573,8 +675,7 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
             ? { title: firstPost.message }
             : {}),
           ...(isPhoto ? { description: firstPost.message } : {}),
-          privacy_level:
-            firstPost.settings.privacy_level || 'PUBLIC_TO_EVERYONE',
+          privacy_level: firstPost.settings.privacy_level,
           ...(isPhoto
             ? {}
             : { disable_duet: !this.assetBoolean(firstPost.settings.duet) }),
@@ -862,6 +963,21 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
     const videoSize = isPhoto
       ? undefined
       : await this.mediaSize(videoPath, 'tiktok-error-upload');
+
+    // TikTok: re-check creator_info right before a Direct Post and stop if the
+    // account can't post now. Nothing irreversible has happened yet, so a retry
+    // is safe. Transient creator_info errors fall through: the init call below
+    // enforces the same caps. reached_active_user_cap keeps upstream's
+    // Disconnect (what the init call would have thrown).
+    if (this.contentPostingMethod(firstPost) === 'DIRECT_POST') {
+      const info = await this.creatorInfo(accessToken);
+      if (info.canPost === false && !info.transient) {
+        if (info.code === 'reached_active_user_cap') {
+          throw new Disconnect('tiktok', '{}', '{}', info.message);
+        }
+        throw new BadBody('tiktok-error-upload', '{}', '{}', info.message);
+      }
+    }
 
     const {
       data: { publish_id, upload_url },
