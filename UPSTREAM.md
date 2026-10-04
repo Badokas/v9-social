@@ -6,7 +6,7 @@ Branch `v9` = an upstream release tag + a small patch stack on top.
 - `origin`   → https://github.com/Badokas/v9-social (default branch `v9`)
 - `upstream` → https://github.com/gitroomhq/postiz-app
 - Current base: `v2.25.0` (update this line on every rebase)
-- Current release tag: `v2.25.0-v9.5` (bump `-v9.<n>` on every build)
+- Current release tag: `v2.25.0-v9.6` (bump `-v9.<n>` on every build)
 
 ## Updating to a new upstream release
 
