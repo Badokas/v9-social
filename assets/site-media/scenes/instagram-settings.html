@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>V9 Social: Instagram post settings</title>
+<link rel="stylesheet" href="common.css" />
+<style>
+  .modal { left: 40px; top: 30px; right: 40px; bottom: 30px; display: flex; flex-direction: column; }
+  .mb { flex: 1; display: flex; min-height: 0; }
+  .ml { width: 520px; padding: 18px 22px; display: flex; flex-direction: column; gap: 16px; border-right: 1px solid var(--line); }
+  .mr { flex: 1; padding: 18px 24px; display: flex; flex-direction: column; gap: 14px; position: relative; }
+  .tabs { display: flex; gap: 8px; }
+  .tab { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px; background: var(--card); font-size: 13px; }
+  .tab.on { box-shadow: inset 0 0 0 1px rgba(234, 88, 12, 0.7); background: rgba(194, 65, 12, 0.15); }
+  .vid { height: 300px; width: 170px; position: relative; }
+  .dur { position: absolute; right: 8px; bottom: 8px; z-index: 3; font-size: 11px; background: rgba(0, 0, 0, 0.6); padding: 2px 6px; border-radius: 6px; }
+  .acct { display: flex; align-items: center; gap: 10px; font-size: 14px; background: var(--card); border-radius: 12px; padding: 10px 12px; }
+  .acct b { font-weight: 600; }
+  .acct span { color: var(--muted); }
+  .sect { font-size: 13px; font-weight: 600; color: #e5e5e5; }
+  .reveal { overflow: hidden; display: flex; flex-direction: column; gap: 10px; }
+  .mf { height: 64px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 10px; padding: 0 22px; }
+  .spin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; border-right-color: transparent; }
+  .toast { right: 64px; top: 40px; }
+  /* collaborator tag field */
+  .tags { min-height: 40px; border: 1px solid var(--line2); border-radius: 10px; background: var(--bg); display: flex; align-items: center; gap: 8px; padding: 0 12px; font-size: 14px; }
+  .chipc { display: inline-flex; align-items: center; gap: 7px; background: var(--card2); border-radius: 999px; padding: 4px 10px 4px 4px; font-size: 13px; }
+  .chipc::after { content: '\00d7'; color: var(--muted); font-size: 14px; }
+  .dis { opacity: 0.45; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="modal" id="modal">
+    <div class="mh">Create Post <span style="margin-left:auto;font-size:13px;color:var(--muted);font-weight:500">Thu, Oct 8 · 18:00</span></div>
+    <div class="mb">
+      <div class="ml">
+        <div class="tabs">
+          <div class="tab">Global</div>
+          <div class="tab on"><div class="av sm" style="--g:linear-gradient(135deg,#ea580c,#7c2d12)">VS<img class="pf" src="../../../apps/frontend/public/icons/platforms/instagram-standalone.png" alt="" /></div>Instagram</div>
+        </div>
+        <div class="editor" style="height:110px">Behind the scenes of our autumn shoot. Which look is your favourite?</div>
+        <div style="display:flex;gap:14px;align-items:flex-end">
+          <div class="photo vid"><div class="play"><i></i></div><div class="dur">0:14</div></div>
+          <div class="note">studio-tour.mp4<br />1080 × 1920 · 14 s</div>
+        </div>
+      </div>
+      <div class="mr">
+        <div class="acct">
+          <div class="av" style="--g:linear-gradient(135deg,#ea580c,#7c2d12)">VS<img class="pf" src="../../../apps/frontend/public/icons/platforms/instagram-standalone.png" alt="" /></div>
+          <div>Posting to Instagram account: <b>V9 Studio</b> <span>(@v9studio)</span><div class="note">Professional account · connected with Instagram login</div></div>
+        </div>
+        <div style="position:relative">
+          <div class="label">Post Type</div>
+          <div class="select" id="sel"><span id="selv" style="color:var(--muted)">Select Post Type…</span></div>
+          <div class="dropdown" id="dd" style="top:70px">
+            <div id="o1">Post / Reel</div><div>Story</div>
+          </div>
+        </div>
+        <div>
+          <div class="label">Collaborators (max 3) — accounts can't be private</div>
+          <div class="tags" id="tags">
+            <span class="chipc" id="chip"><span class="av sm" style="--g:linear-gradient(135deg,#f59e0b,#78350f)">AS</span>@autumnstudio</span>
+            <span class="note" id="tagsph">Add an account</span>
+          </div>
+        </div>
+        <div>
+          <div class="label">Audio (Reels only — single video)</div>
+          <div class="select dis"><span style="color:var(--muted)">Search for a sound</span></div>
+          <div class="note" style="margin-top:6px">Available with Facebook login only. Add the sound to your video before uploading.</div>
+        </div>
+        <div class="cb" id="cbt"><i></i>Trial Reel (share only to non-followers first)</div>
+        <div class="reveal" id="rev">
+          <div style="position:relative">
+            <div class="label">Graduation Strategy</div>
+            <div class="select" id="sel2"><span id="sel2v">Manual</span></div>
+            <div class="dropdown" id="dd2" style="top:70px">
+              <div>Manual</div><div id="o2">Auto (based on performance)</div>
+            </div>
+          </div>
+        </div>
+        <div class="note" style="margin-top:auto">Published through the official Instagram API. Nothing is posted until you publish or the scheduled time arrives.</div>
+      </div>
+    </div>
+    <div class="mf">
+      <div class="spacer"></div>
+      <div class="btn ghost">Save as draft</div>
+      <div class="btn brand" id="post">Post now</div>
+    </div>
+  </div>
+  <div class="toast info" id="t1"><span class="spin" style="border-color:#fdba74;border-right-color:transparent"></span>Uploading to Instagram, this takes a moment</div>
+  <div class="toast" id="t2"><span class="dot"></span>Published to Instagram · @v9studio</div>
+
+  <div class="ripple"></div>
+  <svg class="cursor" viewBox="0 0 24 24"><path d="M3 2l7.5 19 2.6-7.9L21 10.5z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>
+  <div class="fade"></div>
+</div>
+<script src="common.js"></script>
+<script>
+  const { p, pop, lin, $, style, cursor, loopFade } = V9;
+  const D = 10.5;
+  function seek(t) {
+    // post type select
+    const open = t >= 1.1 && t < 1.85;
+    style('#dd', { display: open ? 'block' : 'none', opacity: lin(t, 1.1, 1.25) });
+    $('#o1').className = t > 1.55 ? 'hl' : '';
+    const chosen = t >= 1.85;
+    $('#selv').textContent = chosen ? 'Post / Reel' : 'Select Post Type…';
+    $('#selv').style.color = chosen ? '#fff' : 'var(--muted)';
+    // collaborator chip
+    const col = pop(t, 2.55, 2.9);
+    style('#chip', {
+      display: t >= 2.55 ? 'inline-flex' : 'none',
+      opacity: Math.min(1, col),
+      transform: `scale(${Math.min(1, 0.6 + col * 0.4)})`,
+    });
+    $('#tagsph').textContent = t >= 2.55 ? 'Add another' : 'Add an account';
+    // trial reel + graduation strategy
+    const trial = t >= 3.55;
+    $('#cbt').className = 'cb' + (trial ? ' on' : '');
+    style('#rev', {
+      maxHeight: `${p(t, 3.55, 3.9) * 80}px`,
+      opacity: p(t, 3.55, 3.9),
+      // let the Graduation Strategy dropdown escape the reveal clip once open
+      overflow: t >= 3.9 ? 'visible' : 'hidden',
+    });
+    const open2 = t >= 4.5 && t < 5.15;
+    style('#dd2', { display: open2 ? 'block' : 'none', opacity: lin(t, 4.5, 4.65) });
+    $('#o2').className = t > 4.85 ? 'hl' : '';
+    $('#sel2v').textContent = t >= 5.15 ? 'Auto (based on performance)' : 'Manual';
+    // publish
+    const posting = t >= 5.9 && t < 6.9;
+    $('#post').innerHTML = posting ? '<span class="spin"></span>Posting' : t >= 6.9 ? '&#10003; Posted' : 'Post now';
+    $('#post').style.transform = `scale(${t > 5.85 && t < 5.98 ? 0.95 : 1})`;
+    const a = pop(t, 6.7, 7.1) * (1 - p(t, 8.0, 8.3));
+    style('#t1', { opacity: Math.min(1, a), transform: `translateY(${(1 - a) * 16}px)` });
+    const b = pop(t, 8.2, 8.6);
+    style('#t2', { opacity: Math.min(1, b), transform: `translateY(${(1 - b) * 16}px)` });
+
+    cursor(t, [
+      [0, [1100, 600]], [0.95, '#sel'], [1.25, '#sel'], [1.7, '#o1'], [1.95, '#o1'], [2.4, '#tags'],
+      [2.75, '#tags'], [3.4, '#cbt i'], [3.75, '#cbt i'], [4.35, '#sel2'], [4.65, '#sel2'], [5.0, '#o2'],
+      [5.25, '#o2'], [5.8, '#post'], [6.2, '#post'], [6.9, [1180, 420]],
+    ], [1.1, 1.85, 2.55, 3.55, 4.5, 5.15, 5.9]);
+    loopFade(t, D);
+  }
+  V9.run(seek, D);
+</script>
+</body>
+</html>

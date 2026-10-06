@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>V9 Social: TikTok post settings</title>
+<link rel="stylesheet" href="common.css" />
+<style>
+  .modal { left: 40px; top: 30px; right: 40px; bottom: 30px; display: flex; flex-direction: column; }
+  .mb { flex: 1; display: flex; min-height: 0; }
+  .ml { width: 520px; padding: 18px 22px; display: flex; flex-direction: column; gap: 16px; border-right: 1px solid var(--line); }
+  .mr { flex: 1; padding: 18px 24px; display: flex; flex-direction: column; gap: 14px; position: relative; }
+  .tabs { display: flex; gap: 8px; }
+  .tab { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px; background: var(--card); font-size: 13px; }
+  .tab.on { box-shadow: inset 0 0 0 1px rgba(234, 88, 12, 0.7); background: rgba(194, 65, 12, 0.15); }
+  .vid { height: 300px; width: 170px; position: relative; }
+  .dur { position: absolute; right: 8px; bottom: 8px; z-index: 3; font-size: 11px; background: rgba(0, 0, 0, 0.6); padding: 2px 6px; border-radius: 6px; }
+  .acct { display: flex; align-items: center; gap: 10px; font-size: 14px; background: var(--card); border-radius: 12px; padding: 10px 12px; }
+  .acct b { font-weight: 600; }
+  .acct span { color: var(--muted); }
+  .row { display: flex; gap: 22px; }
+  .sect { font-size: 13px; font-weight: 600; color: #e5e5e5; }
+  .reveal { overflow: hidden; display: flex; flex-direction: column; gap: 10px; }
+  .mf { height: 64px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 10px; padding: 0 22px; }
+  .spin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; border-right-color: transparent; }
+  .toast { right: 64px; top: 40px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="modal" id="modal">
+    <div class="mh">Create Post <span style="margin-left:auto;font-size:13px;color:var(--muted);font-weight:500">Thu, Oct 8 · 18:00</span></div>
+    <div class="mb">
+      <div class="ml">
+        <div class="tabs">
+          <div class="tab">Global</div>
+          <div class="tab on"><div class="av sm" style="--g:linear-gradient(135deg,#ea580c,#7c2d12)">VS<img class="pf" src="../../../apps/frontend/public/icons/platforms/tiktok.png" alt="" /></div>TikTok</div>
+        </div>
+        <div class="editor" style="height:110px">Behind the scenes of our autumn shoot. Which look is your favourite?</div>
+        <div style="display:flex;gap:14px;align-items:flex-end">
+          <div class="photo vid"><div class="play"><i></i></div><div class="dur">0:14</div></div>
+          <div class="note">studio-tour.mp4<br />1080 × 1920 · 14 s</div>
+        </div>
+      </div>
+      <div class="mr">
+        <div class="acct">
+          <div class="av" style="--g:linear-gradient(135deg,#ea580c,#7c2d12)">VS<img class="pf" src="../../../apps/frontend/public/icons/platforms/tiktok.png" alt="" /></div>
+          <div>Posting to TikTok account: <b>V9 Studio</b> <span>(@v9studio)</span><div class="note">Maximum video duration for this account: 600s</div></div>
+        </div>
+        <div style="position:relative">
+          <div class="label">Who can see this video?</div>
+          <div class="select" id="sel"><span id="selv" style="color:var(--muted)">Select</span></div>
+          <div class="dropdown" id="dd" style="top:70px">
+            <div id="o1">Everyone</div><div>Friends</div><div>Followers</div><div>Only me</div>
+          </div>
+          <div class="note warn" id="selwarn" style="margin-top:6px">Choose who can see this post, there is no default.</div>
+        </div>
+        <div class="row">
+          <div class="cb" id="cbc"><i></i>Allow Comments</div>
+          <div class="cb"><i></i>Allow Duet</div>
+          <div class="cb"><i></i>Allow Stitch</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="tg" id="tg"></div><div class="sect">Disclose video content</div>
+        </div>
+        <div class="reveal" id="rev">
+          <div class="note warn" id="dwarn">You need to indicate if your content promotes yourself, a third party, or both.</div>
+          <div class="note" id="dlabel" style="color:#fdba74">Your video will be labeled as 'Promotional content'</div>
+          <div class="cb" id="cbb"><i></i>Your brand</div>
+          <div class="cb"><i></i>Branded content</div>
+        </div>
+        <div class="note" style="margin-top:auto">By posting, you agree to TikTok's <a>Music Usage Confirmation</a></div>
+        <div class="note">After publishing, it may take a few minutes for your content to process and be visible on your TikTok profile.</div>
+      </div>
+    </div>
+    <div class="mf">
+      <div class="spacer"></div>
+      <div class="btn ghost">Save as draft</div>
+      <div class="btn brand" id="post">Post now</div>
+    </div>
+  </div>
+  <div class="toast info" id="t1"><span class="spin" style="border-color:#fdba74;border-right-color:transparent"></span>Processing on TikTok, this may take a few minutes</div>
+  <div class="toast" id="t2"><span class="dot"></span>Published to TikTok · @v9studio</div>
+
+  <div class="ripple"></div>
+  <svg class="cursor" viewBox="0 0 24 24"><path d="M3 2l7.5 19 2.6-7.9L21 10.5z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>
+  <div class="fade"></div>
+</div>
+<script src="common.js"></script>
+<script>
+  const { p, pop, lin, $, style, cursor, loopFade } = V9;
+  const D = 10.5;
+  function seek(t) {
+    // privacy select
+    const open = t >= 1.1 && t < 1.85;
+    style('#dd', { display: open ? 'block' : 'none', opacity: lin(t, 1.1, 1.25) });
+    $('#o1').className = t > 1.55 ? 'hl' : '';
+    const chosen = t >= 1.85;
+    $('#selv').textContent = chosen ? 'Everyone' : 'Select';
+    $('#selv').style.color = chosen ? '#fff' : 'var(--muted)';
+    $('#selwarn').style.visibility = chosen ? 'hidden' : 'visible';
+    // interactions, all off by default
+    $('#cbc').className = 'cb' + (t >= 2.55 ? ' on' : '');
+    // disclosure
+    const on = t >= 3.35;
+    $('#tg').className = 'tg' + (on ? ' on' : '');
+    style('#rev', { maxHeight: `${p(t, 3.35, 3.7) * 160}px`, opacity: p(t, 3.35, 3.7) });
+    const brand = t >= 4.45;
+    $('#cbb').className = 'cb' + (brand ? ' on' : '');
+    $('#dwarn').style.display = brand ? 'none' : 'block';
+    $('#dlabel').style.display = brand ? 'block' : 'none';
+    // publish
+    const posting = t >= 5.6 && t < 6.6;
+    $('#post').innerHTML = posting ? '<span class="spin"></span>Posting' : t >= 6.6 ? '&#10003; Posted' : 'Post now';
+    $('#post').style.transform = `scale(${t > 5.55 && t < 5.68 ? 0.95 : 1})`;
+    const a = pop(t, 6.4, 6.8) * (1 - p(t, 8.0, 8.3));
+    style('#t1', { opacity: Math.min(1, a), transform: `translateY(${(1 - a) * 16}px)` });
+    const b = pop(t, 8.2, 8.6);
+    style('#t2', { opacity: Math.min(1, b), transform: `translateY(${(1 - b) * 16}px)` });
+
+    cursor(t, [
+      [0, [1100, 600]], [0.95, '#sel'], [1.25, '#sel'], [1.7, '#o1'], [1.95, '#o1'], [2.45, '#cbc i'],
+      [2.75, '#cbc i'], [3.25, '#tg'], [3.55, '#tg'], [4.35, '#cbb i'], [4.7, '#cbb i'], [5.5, '#post'],
+      [5.9, '#post'], [6.6, [1180, 420]],
+    ], [1.1, 1.85, 2.55, 3.35, 4.45, 5.6]);
+    loopFade(t, D);
+  }
+  V9.run(seek, D);
+</script>
+</body>
+</html>

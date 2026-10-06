@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>V9 Social: planning posts with an AI assistant</title>
+<link rel="stylesheet" href="common.css" />
+<style>
+  .chat { position: absolute; left: 36px; top: 36px; bottom: 36px; width: 600px; background: var(--app); border: 1px solid var(--line2); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.55); }
+  .ch { height: 58px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; padding: 0 18px; font-weight: 600; }
+  .spark { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(135deg, #fb923c, #c2410c); display: grid; place-items: center; }
+  .spark::before { content: ''; width: 12px; height: 12px; background: #fff; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); }
+  .conn { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: #bbf7d0; background: rgba(34,197,94,.12); padding: 5px 10px; border-radius: 999px; }
+  .msgs { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+  .u { align-self: flex-end; max-width: 80%; background: var(--card2); border-radius: 14px 14px 4px 14px; padding: 12px 14px; font-size: 14px; line-height: 1.5; }
+  .tool { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+  .tool b { color: #e5e5e5; font-weight: 500; }
+  .tool .ok { color: #4ade80; margin-left: auto; }
+  .tools { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .a { font-size: 14px; line-height: 1.6; color: #e5e5e5; }
+  .a li { margin-left: 18px; }
+  .inp { margin: 0 16px 16px; border: 1px solid var(--line2); border-radius: 14px; padding: 12px 14px; display: flex; gap: 10px; align-items: flex-end; min-height: 56px; font-size: 14px; line-height: 1.5; }
+  .inp .send { margin-left: auto; width: 32px; height: 32px; border-radius: 10px; background: var(--brand); flex: none; display: grid; place-items: center; }
+  .inp .send::before { content: ''; border-left: 10px solid #fff; border-top: 6px solid transparent; border-bottom: 6px solid transparent; margin-left: 3px; }
+  .ph { color: var(--dim); }
+  .side { position: absolute; left: 664px; right: 36px; top: 36px; bottom: 36px; background: var(--app); border: 1px solid var(--line2); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 30px 80px rgba(0,0,0,.55); }
+  .sh { height: 58px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; padding: 0 16px; font-weight: 600; }
+  .sh img { width: 26px; height: 26px; }
+  .wk { flex: 1; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .wk .col { border-left: 1px solid var(--line); padding: 8px 5px; display: flex; flex-direction: column; gap: 8px; }
+  .wk .col:first-child { border-left: 0; }
+  .wk .dh { font-size: 11px; color: var(--muted); text-align: center; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  .wk .dh b { color: #fff; display: block; font-size: 14px; }
+  .wk .pc { flex-direction: column; gap: 6px; padding: 7px; font-size: 10.5px; }
+  .wk .pc .tm { font-size: 10px; color: var(--muted); }
+  .new .pc { border-color: rgba(234,88,12,.6); }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="chat">
+    <div class="ch"><div class="spark"></div>AI assistant<div class="conn"><span class="dot"></span>V9 Social connected</div></div>
+    <div class="msgs">
+      <div class="u" id="um"></div>
+      <div class="tools" id="tools">
+        <div class="tool" id="tl1">V9 Social · <b>list channels</b><span class="ok">&#10003; 2 channels</span></div>
+        <div class="tool" id="tl2">V9 Social · <b>schedule post</b> Tue 18:00 TikTok<span class="ok">&#10003;</span></div>
+        <div class="tool" id="tl3">V9 Social · <b>schedule post</b> Thu 19:00 Instagram<span class="ok">&#10003;</span></div>
+        <div class="tool" id="tl4">V9 Social · <b>schedule post</b> Sat 17:00 TikTok + Instagram<span class="ok">&#10003;</span></div>
+      </div>
+      <div class="a" id="ans"><div id="ansT"></div>
+        <ul id="ansL" style="margin-top:6px">
+          <li id="l1">Tue 18:00, TikTok: first look at the collection</li>
+          <li id="l2">Thu 19:00, Instagram: carousel of five looks</li>
+          <li id="l3">Sat 17:00, both: launch day reel</li>
+        </ul>
+        <div id="ansE" style="margin-top:6px;color:var(--muted)">Each post is in your calendar with a preview, so you can review or edit it before it goes out.</div>
+      </div>
+    </div>
+    <div class="inp"><span id="it"></span><span class="caret" id="caret"></span><div class="send" id="send"></div></div>
+  </div>
+
+  <div class="side">
+    <div class="sh"><img src="../../../apps/frontend/public/v9social/v9social-sq.svg" alt="" />V9 Social · Calendar<span style="margin-left:auto;font-size:12px;color:var(--muted);font-weight:500">Oct 5 – 11</span></div>
+    <div class="wk" id="wk"></div>
+  </div>
+  <div class="fade"></div>
+</div>
+<script src="common.js"></script>
+<script>
+  const TT = '../../../apps/frontend/public/icons/platforms/tiktok.png';
+  const IG = '../../../apps/frontend/public/icons/platforms/instagram-standalone.png';
+  const av = (icon, ml = 0) => `<div class="av sm" style="--g:linear-gradient(135deg,#ea580c,#7c2d12);margin-left:${ml}px">VS<img class="pf" src="${icon}" alt=""></div>`;
+  const card = (icons, tm, text, cls, label, id = '') =>
+    `<div class="${id ? 'new' : ''}" id="${id}"><div class="pc"><div style="display:flex;align-items:center;gap:6px">${icons.map((i, k) => av(i, k ? -12 : 0)).join('')}<span class="tm">${tm}</span></div><div class="t">${text}</div><div><span class="pill ${cls}">${label}</span></div></div></div>`;
+  const cols = [
+    ['Mon', 5, [card([IG], '09:00', 'Monday tips', 'pub', 'Published')]],
+    ['Tue', 6, [card([TT], '18:00', 'First look at the collection', 'sch', 'Scheduled', 'n1')]],
+    ['Wed', 7, [card([IG], '15:00', 'Customer story', 'sch', 'Scheduled')]],
+    ['Thu', 8, [card([IG], '19:00', 'Carousel: five looks', 'sch', 'Scheduled', 'n2')]],
+    ['Fri', 9, []],
+    ['Sat', 10, [card([TT, IG], '17:00', 'Launch day reel', 'sch', 'Scheduled', 'n3')]],
+    ['Sun', 11, [card([IG], '12:00', 'Weekly recap', 'dr', 'Draft')]],
+  ];
+  V9.$('#wk').innerHTML = cols.map(([d, n, cs]) => `<div class="col"><div class="dh">${d}<b>${n}</b></div>${cs.join('')}</div>`).join('');
+
+  const PROMPT = 'Plan 3 posts for our autumn launch on TikTok and Instagram this week and schedule them in the evenings.';
+  const ANS = 'Done. I scheduled 3 posts in V9 Social:';
+  const { p, pop, lin, typed, $, style, loopFade } = V9;
+  const D = 12;
+  function seek(t) {
+    const sent = t >= 3.3;
+    $('#it').innerHTML = sent ? '<span class="ph">Ask anything</span>' : (typed(PROMPT, t, 0.4, 3.0) || '<span class="ph">Ask anything</span>');
+    $('#caret').style.display = sent ? 'none' : 'inline-block';
+    $('#send').style.transform = `scale(${t > 3.2 && t < 3.35 ? 0.85 : 1})`;
+    $('#um').textContent = PROMPT;
+    const u = p(t, 3.3, 3.6);
+    style('#um', { display: sent ? 'block' : 'none', opacity: u, transform: `translateY(${(1 - u) * 20}px)` });
+    style('#tools', { display: t >= 3.8 ? 'flex' : 'none', opacity: p(t, 3.8, 4.0) });
+    [['#tl1', 3.9], ['#tl2', 4.5], ['#tl3', 5.1], ['#tl4', 5.7]].forEach(([s, a]) => {
+      style(s, { opacity: lin(t, a, a + 0.2) });
+      $(s + ' .ok').style.opacity = t >= a + 0.45 ? 1 : 0;
+    });
+    [['#n1', 4.95], ['#n2', 5.55], ['#n3', 6.15]].forEach(([s, a]) => {
+      const k = pop(t, a, a + 0.45);
+      style(s, { opacity: lin(t, a, a + 0.15), transform: `scale(${0.7 + 0.3 * k})` });
+      const g = 1 - lin(t, a + 0.4, a + 1.6);
+      $(s + ' .pc').style.boxShadow = t > a ? `0 0 0 ${3 * g}px rgba(234,88,12,${0.4 * g})` : 'none';
+    });
+    style('#ans', { display: t >= 6.5 ? 'block' : 'none' });
+    $('#ansT').textContent = typed(ANS, t, 6.5, 7.2);
+    [['#l1', 7.3], ['#l2', 7.7], ['#l3', 8.1]].forEach(([s, a]) => style(s, { opacity: p(t, a, a + 0.3) }));
+    style('#ansE', { opacity: p(t, 8.6, 9.0) });
+    loopFade(t, D);
+  }
+  V9.run(seek, D);
+</script>
+</body>
+</html>

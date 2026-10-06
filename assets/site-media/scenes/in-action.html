@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>V9 Social in action</title>
+<link rel="stylesheet" href="common.css" />
+<style>
+  .create { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.5); }
+  .modal { left: 50%; top: 50%; width: 900px; height: 560px; margin: -280px 0 0 -450px; display: flex; flex-direction: column; }
+  .mb { flex: 1; display: flex; min-height: 0; }
+  .ml { flex: 1; padding: 18px 20px; display: flex; flex-direction: column; gap: 16px; border-right: 1px solid var(--line); }
+  .mr { width: 300px; padding: 18px 20px; background: #151414; }
+  .accs { display: flex; gap: 14px; }
+  .acc { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+  .editor { height: 150px; }
+  .media { display: flex; gap: 10px; align-items: center; }
+  .ins { height: 64px; width: 64px; border: 1px dashed var(--line2); border-radius: 10px; display: grid; place-items: center; font-size: 22px; color: var(--muted); }
+  .thumb { width: 64px; height: 64px; }
+  .mf { height: 68px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 10px; padding: 0 20px; }
+  .date { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 10px; background: var(--card); font-size: 14px; }
+  .date i { width: 14px; height: 14px; border-radius: 3px; border: 2px solid #fdba74; }
+  .pv { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+  .pvh { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; margin-bottom: 10px; }
+  .pvh span { color: var(--muted); font-weight: 500; }
+  .pvt { font-size: 12px; line-height: 1.5; color: #e5e5e5; min-height: 54px; }
+  .pvi { margin-top: 10px; height: 230px; }
+  .new { position: absolute; left: 6px; right: 6px; top: 6px; }
+  .new .pc { border-color: rgba(234, 88, 12, 0.6); }
+  .spin { width: 9px; height: 9px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="app">
+    <div class="sidebar">
+      <img class="logo" src="../../../apps/frontend/public/v9social/v9social-sq.svg" alt="" />
+      <div class="ico on"></div><div class="ico"></div><div class="ico"></div><div class="ico"></div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div class="title">Calendar</div>
+        <div class="seg"><span>Day</span><span class="on">Week</span><span>Month</span></div>
+        <div style="font-size:14px;color:var(--muted)">Oct 5 – 11, 2026</div>
+        <div class="spacer"></div>
+        <div class="btn brand create" id="create">+ Create Post</div>
+      </div>
+      <div class="cal" id="cal"></div>
+    </div>
+  </div>
+
+  <div class="backdrop" id="backdrop"></div>
+  <div class="modal" id="modal">
+    <div class="mh">Create Post</div>
+    <div class="mb">
+      <div class="ml">
+        <div>
+          <div class="label">Selected channels</div>
+          <div class="accs">
+            <div class="acc"><div class="av off" id="a1" style="--g:linear-gradient(135deg,#ea580c,#7c2d12)">VS<img class="pf" src="../../../apps/frontend/public/icons/platforms/tiktok.png" alt="" /></div>v9studio</div>
+            <div class="acc"><div class="av off" id="a2" style="--g:linear-gradient(135deg,#ea580c,#7c2d12)">VS<img class="pf" src="../../../apps/frontend/public/icons/platforms/instagram-standalone.png" alt="" /></div>v9studio</div>
+            <div class="acc"><div class="av off" id="a3" style="--g:linear-gradient(135deg,#6366f1,#1e1b4b)">VB<img class="pf" src="../../../apps/frontend/public/icons/platforms/instagram-standalone.png" alt="" /></div>v9.shop</div>
+          </div>
+        </div>
+        <div>
+          <div class="label">Post</div>
+          <div class="editor" id="editor"><span id="txt"></span><span class="caret" id="caret"></span></div>
+        </div>
+        <div class="media">
+          <div class="ins" id="ins">+</div>
+          <div class="photo thumb" id="thumb"></div>
+          <div class="note" id="mnote">Insert media</div>
+        </div>
+      </div>
+      <div class="mr">
+        <div class="label">Preview</div>
+        <div class="pv">
+          <div class="pvh"><div class="av sm" style="--g:linear-gradient(135deg,#ea580c,#7c2d12)">VS</div>v9studio <span>· now</span></div>
+          <div class="pvt" id="pvt"></div>
+          <div class="photo pvi" id="pvi"></div>
+        </div>
+      </div>
+    </div>
+    <div class="mf">
+      <div class="date" id="date"><i></i>Thu, Oct 8 · 18:00</div>
+      <div class="spacer"></div>
+      <div class="btn ghost">Save as draft</div>
+      <div class="btn brand" id="add">Add to calendar</div>
+    </div>
+  </div>
+
+  <div class="ripple"></div>
+  <svg class="cursor" viewBox="0 0 24 24"><path d="M3 2l7.5 19 2.6-7.9L21 10.5z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>
+  <div class="fade"></div>
+</div>
+
+<script src="common.js"></script>
+<script>
+  const TT = '../../../apps/frontend/public/icons/platforms/tiktok.png';
+  const IG = '../../../apps/frontend/public/icons/platforms/instagram-standalone.png';
+  const days = [['Mon', 5], ['Tue', 6], ['Wed', 7], ['Thu', 8], ['Fri', 9], ['Sat', 10], ['Sun', 11]];
+  const hours = ['09:00', '12:00', '15:00', '18:00'];
+  const posts = {
+    '0-0': [IG, 'Monday motivation: three tips for planning your week', 'pub', 'Published'],
+    '1-1': [TT, 'Studio tour, part 2: where the magic happens', 'pub', 'Published'],
+    '2-2': [IG, 'Customer story: how Lina grew her shop', 'sch', 'Scheduled'],
+    '4-0': [IG, 'Draft: autumn lookbook carousel', 'dr', 'Draft'],
+    '5-1': [TT, 'Weekend sale starts now, 20% off', 'sch', 'Scheduled'],
+    '6-3': [IG, 'Sunday recap of the week', 'sch', 'Scheduled'],
+  };
+  const card = (icon, text, cls, label) =>
+    `<div class="pc"><div class="av sm" style="--g:linear-gradient(135deg,#ea580c,#7c2d12)">VS<img class="pf" src="${icon}" alt=""></div><div><div class="t">${text}</div><div class="pill ${cls}">${label}</div></div></div>`;
+  let html = '<div></div>' + days.map(([d, n], i) => `<div class="dh ${i === 0 ? 'today' : ''}">${d} <b>${n}</b></div>`).join('');
+  hours.forEach((h, r) => {
+    html += `<div class="hr">${h}</div>`;
+    days.forEach((_, c) => {
+      const p = posts[`${c}-${r}`];
+      html += `<div class="cell" id="c${c}-${r}">${p ? card(...p) : ''}</div>`;
+    });
+  });
+  V9.$('#cal').innerHTML = html;
+  const slot = V9.$('#c3-3');
+  slot.insertAdjacentHTML('beforeend', `<div class="new" id="new"><div class="pc"><div style="display:flex"><div class="av sm" style="--g:linear-gradient(135deg,#ea580c,#7c2d12)">VS<img class="pf" src="${TT}" alt=""></div><div class="av sm" style="--g:linear-gradient(135deg,#ea580c,#7c2d12);margin-left:-8px">VS<img class="pf" src="${IG}" alt=""></div></div><div><div class="t">New drop this Thursday: our autumn collection</div><div class="pill sch" id="st">Scheduled</div></div></div></div>`);
+
+  const TEXT = 'New drop this Thursday: our autumn collection is here. Behind the scenes, colours and first looks.';
+  const { p, pop, lin, typed, $, style, cursor, loopFade } = V9;
+  const D = 11;
+
+  function seek(t) {
+    // create button press
+    $('#create').style.transform = `scale(${t > 0.95 && t < 1.08 ? 0.95 : 1})`;
+    // modal in/out
+    const mIn = p(t, 1.05, 1.35), mOut = p(t, 6.7, 7.0);
+    const mo = mIn * (1 - mOut);
+    style('#modal', { opacity: mo, transform: `scale(${0.96 + 0.04 * mIn - 0.03 * mOut})`, visibility: mo > 0 ? 'visible' : 'hidden' });
+    style('#backdrop', { opacity: mo, visibility: mo > 0 ? 'visible' : 'hidden' });
+    // channel selection
+    $('#a1').className = 'av ' + (t >= 1.8 ? 'sel' : 'off');
+    $('#a2').className = 'av ' + (t >= 2.3 ? 'sel' : 'off');
+    $('#a3').className = 'av off';
+    // typing
+    const s = typed(TEXT, t, 2.85, 5.0);
+    $('#txt').textContent = s;
+    $('#pvt').textContent = s || ' ';
+    $('#caret').style.opacity = t > 2.75 && t < 5.4 && Math.floor(t * 3) % 2 === 0 || (t > 2.85 && t < 5.0) ? 1 : 0;
+    // media
+    const m = pop(t, 5.45, 5.8);
+    style('#thumb', { display: t < 5.45 ? 'none' : 'block', opacity: lin(t, 5.45, 5.6), transform: `scale(${0.6 + 0.4 * m})` });
+    style('#pvi', { opacity: p(t, 5.5, 5.9) });
+    $('#mnote').textContent = t >= 5.45 ? 'autumn-collection.jpg' : 'Insert media';
+    // date chip highlight
+    $('#date').style.boxShadow = t >= 6.05 ? 'inset 0 0 0 1px rgba(234,88,12,.7)' : 'none';
+    $('#add').style.transform = `scale(${t > 6.55 && t < 6.68 ? 0.95 : 1})`;
+    // new card in calendar
+    const nc = pop(t, 7.05, 7.6);
+    style('#new', { opacity: lin(t, 7.05, 7.25), transform: `translateY(${(1 - nc) * -24}px) scale(${0.9 + 0.1 * nc})` });
+    const glow = 1 - lin(t, 7.6, 8.6);
+    $('#new .pc').style.boxShadow = t > 7.05 ? `0 0 0 ${3 * glow}px rgba(234,88,12,${0.35 * glow}), 0 10px 30px rgba(0,0,0,.4)` : 'none';
+    const st = $('#st');
+    if (t < 8.8) { st.className = 'pill sch'; st.innerHTML = 'Scheduled'; }
+    else if (t < 9.6) { st.className = 'pill sch'; st.innerHTML = '<span class="spin"></span>Publishing'; }
+    else { st.className = 'pill pub'; st.innerHTML = '&#10003; Published'; }
+
+    cursor(t, [
+      [0, [980, 560]], [0.85, '#create'], [1.4, '#create'], [1.75, '#a1'], [1.9, '#a1'], [2.25, '#a2'],
+      [2.5, '#a2'], [2.75, '#editor'], [5.0, '#editor'], [5.35, '#ins'], [5.6, '#ins'], [6.0, '#date'],
+      [6.2, '#date'], [6.55, '#add'], [6.8, '#add'], [7.6, [1150, 640]],
+    ], [1.0, 1.8, 2.3, 2.75, 5.4, 6.05, 6.6]);
+    loopFade(t, D);
+  }
+  V9.run(seek, D);
+</script>
+</body>
+</html>

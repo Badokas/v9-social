@@ -53,6 +53,12 @@ export async function proxy(request: NextRequest) {
     // V9 Social: public legal pages
     nextUrl.pathname === '/terms' ||
     nextUrl.pathname === '/privacy' ||
+    // V9 Social: public site (home for signed-out visitors, channel pages).
+    // Signed-in "/" and "/?org=" invites keep the upstream redirects below.
+    nextUrl.pathname.startsWith('/channels/') ||
+    nextUrl.pathname === '/ai-agents' ||
+    nextUrl.pathname === '/pricing' ||
+    (nextUrl.pathname === '/' && !authCookie && !nextUrl.searchParams.has('org')) ||
     // the consent screen of MCP / OAuth clients handles signed-out visitors
     // itself (sign in and come back, or connect a self-hosted instance)
     nextUrl.pathname.startsWith('/oauth/authorize')
