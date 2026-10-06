@@ -6,7 +6,7 @@ Branch `v9` = an upstream release tag + a small patch stack on top.
 - `origin`   → https://github.com/Badokas/v9-social (default branch `v9`)
 - `upstream` → https://github.com/gitroomhq/postiz-app
 - Current base: `v2.25.0` (update this line on every rebase)
-- Current release tag: `v2.25.0-v9.6` (bump `-v9.<n>` on every build)
+- Current release tag: `v2.25.1-v9.2` (bump `-v9.<n>` on every build)
 
 ## Updating to a new upstream release
 
@@ -185,3 +185,17 @@ Files: new `apps/frontend/src/app/(app)/(public)/**`,
 files touched: `apps/frontend/src/proxy.ts` (public-path allowlist) and
 `apps/frontend/src/components/ui/logo-text.component.tsx` (optional
 `className` so the site header can scale the wordmark down on mobile).
+
+## Logout with `NOT_SECURED`
+
+`fix:` upstream bug (since `6ba1ab91`, "feat: not secured"). With
+`NOT_SECURED=true` the login response stores `auth` twice: a cookie with
+`Domain=<FRONTEND_URL domain>` from the backend `Set-Cookie`, and a host-only
+copy written by `setCookie()` from the `auth` response header. Upstream's
+`LogoutComponent` only cleared the host-only copy in the browser, so the
+Domain cookie survived and `/` sent the user straight back to the app.
+Our `LogoutComponent` always calls `POST /user/logout` (its `Set-Cookie`
+matches the Domain cookies) and then clears the host-only copies.
+
+File touched: `apps/frontend/src/components/layout/logout.component.tsx`.
+Drop this patch if upstream fixes logout for non-secured mode.
