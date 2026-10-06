@@ -161,3 +161,27 @@ Files touched (where rebase conflicts land):
 - `libraries/nestjs-libraries/src/dtos/posts/providers-settings/tiktok.dto.ts`
 - `apps/frontend/src/components/new-launch/providers/tiktok/tiktok.provider.tsx`
 - `libraries/react-shared-libraries/src/form/checkbox.tsx` (real `disabled`)
+
+## Public site
+
+`feat:` fork-only marketing pages for signed-out visitors (TikTok app review
+needs a real public website on the app's domain): `/`, `/channels/tiktok`,
+`/channels/instagram`, `/ai-agents` (the app already owns `/agents`),
+`/pricing`. `/terms` and `/privacy` share the same header/footer.
+Content is plain English in `components/v9/site/site.data.ts`; public contact
+is `hey@void9.com` (legal contact stays on the legal pages). Add a channel by
+adding an entry to `CHANNELS`.
+
+Signed-in users hitting `/` and `/?org=` invites keep the upstream redirects.
+
+Artwork is original and generated: the scenes in `assets/site-media/scenes`
+render to `apps/frontend/public/v9social/site` via `assets/site-media/render.mjs`
+(needs ffmpeg, ImageMagick and playwright-core; see the header of that file).
+Each channel page shows a looping composer video of its own post settings
+(`v9-tiktok-settings`, `v9-instagram-settings`).
+
+Files: new `apps/frontend/src/app/(app)/(public)/**`,
+`apps/frontend/src/components/v9/site/*` and `assets/site-media/**`; upstream
+files touched: `apps/frontend/src/proxy.ts` (public-path allowlist) and
+`apps/frontend/src/components/ui/logo-text.component.tsx` (optional
+`className` so the site header can scale the wordmark down on mobile).

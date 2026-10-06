@@ -2,12 +2,15 @@ import React from 'react';
 
 // V9 Social wordmark (assets/v9social-textonly.svg). fill="currentColor" so it
 // follows the container's text colour in dark and light mode.
-export const LogoTextComponent = () => {
+// `className` lets a caller override the default 205x33 size (the public site
+// header scales it down on narrow screens); CSS wins over the attributes.
+export const LogoTextComponent = ({ className }: { className?: string }) => {
   return (
     <svg
       width="205"
       height="33"
       viewBox="0 0 800 129"
+      className={className}
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-label="V9 Social"
