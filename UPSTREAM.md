@@ -52,6 +52,8 @@ Rules to keep merges cheap:
 
 - Touch as few upstream files as possible; prefer adding new files/assets.
 - Don't reformat unrelated code.
+- The repo page shows our `.github/README.md` (GitHub prefers it over the
+  root one); leave upstream's root `README.md` untouched.
 - Don't edit every i18n locale; change English/visible defaults only.
 - Don't edit upstream `.github/workflows/*`; disable unwanted ones on the
   fork with `gh workflow disable` and add our own workflow files instead.
