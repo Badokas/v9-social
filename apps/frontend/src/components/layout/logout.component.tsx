@@ -21,12 +21,22 @@ export const LogoutComponent: FC<{ isIcon?: boolean }> = ({ isIcon }) => {
         t('yes_logout', 'Yes logout')
       )
     ) {
-      if (!isSecured) {
-        setCookie('auth', '', -10);
-      } else {
+      // V9 Social: always ask the backend to log out. With NOT_SECURED the
+      // login response stores `auth` twice: a Domain-scoped cookie from the
+      // backend Set-Cookie and a host-only copy written by setCookie(). Only
+      // the backend's Set-Cookie (matching Domain) can delete the first one,
+      // so clearing the host-only copy alone left users signed in.
+      try {
         await fetch('/user/logout', {
           method: 'POST',
         });
+      } catch (e) {
+        // still clear the client-side copies below
+      }
+      if (!isSecured) {
+        setCookie('auth', '', -10);
+        setCookie('showorg', '', -10);
+        setCookie('impersonate', '', -10);
       }
       window.location.href = '/';
     }
