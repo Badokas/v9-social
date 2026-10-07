@@ -6,7 +6,7 @@ Branch `v9` = an upstream release tag + a small patch stack on top.
 - `origin`   → https://github.com/Badokas/v9-social (default branch `v9`)
 - `upstream` → https://github.com/gitroomhq/postiz-app
 - Current base: `v2.25.0` (update this line on every rebase)
-- Current release tag: `v2.25.1-v9.2` (bump `-v9.<n>` on every build)
+- Current release tag: `v2.25.1-v9.3` (bump `-v9.<n>` on every build)
 
 ## Updating to a new upstream release
 
@@ -141,13 +141,17 @@ also gets no privacy default, unchecked interactions and the new
 labels/declaration, but no creator_info, blocking or Direct Post-only.
 
 Scopes: `user.info.basic`, `user.info.profile` (username for release URLs),
-`video.publish` (creator_info, Direct Post init, publish status/release URL).
-Dropped, with consequences:
+`user.info.stats` and `video.list` (upstream's unchanged `analytics()`,
+`postAnalytics()` and `missing()`), `video.publish` (creator_info, Direct Post
+init, publish status/release URL). Dropped, with consequences:
 
 - `video.upload`: UPLOAD (send to TikTok inbox) is rejected for `tiktok`.
-- `user.info.stats`, `video.list`: TikTok `analytics()`, `postAnalytics()`
-  and `missing()` return empty (verified they degrade to `[]`, no
-  refresh/disconnect).
+  The portal lists it anyway (bundled with Content Posting API, can't be
+  removed); the app review form says it isn't requested.
+
+TikTok channels connected while the fork asked for 3 scopes keep their old
+token: connect the same account again (Add Channel → TikTok updates the
+existing channel) before analytics work for them.
 
 Behavior: creator_info is shown in the composer and re-checked before each
 publish; no `PUBLIC_TO_EVERYONE` fallback; `/posts/valid` rejects missing
