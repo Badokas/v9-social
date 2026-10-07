@@ -59,7 +59,7 @@ export const CHANNELS: Channel[] = [
     requirements: ['A TikTok account you own.', 'A V9 Social account.'],
     connectSteps: [
       'In V9 Social, open Add Channel and choose TikTok.',
-      'Sign in on TikTok and review the permissions: basic profile info, username and posting videos.',
+      'Sign in on TikTok and review the permissions: basic profile info, username, account stats, your video list and posting videos.',
       'Click Authorize. Your avatar and display name appear in your channel list.',
     ],
     postTypes: [
@@ -106,6 +106,7 @@ export const CHANNELS: Channel[] = [
       'Your TikTok open ID, display name, avatar and username.',
       'Access and refresh tokens issued by TikTok, to post on your behalf.',
       'The videos, photos and captions you choose to publish, and the post IDs TikTok returns.',
+      'Follower, following, likes and video counts, and the views, likes, comments and shares of your recent videos, shown in analytics (cached for up to an hour).',
     ],
     faq: [
       {

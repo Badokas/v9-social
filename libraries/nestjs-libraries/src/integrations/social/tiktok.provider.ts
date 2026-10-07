@@ -37,14 +37,22 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
   name = 'Tiktok';
   isBetweenSteps = false;
   convertToJPEG = true;
-  // Minimal scopes for Direct Post (TikTok app review asks for the least we use):
-  // - video.publish: creator_info/query, video/init + content/init (DIRECT_POST)
-  //   and post/publish/status/fetch (release URL), so video.list isn't needed.
-  // - user.info.profile: `username`, used as the profile in release URLs.
-  // Dropped: video.upload (UPLOAD / inbox only, disabled here), user.info.stats
-  // and video.list (only analytics()/postAnalytics()/missing(), which now
-  // return [] - see UPSTREAM.md "TikTok patches").
-  scopes = ['user.info.basic', 'user.info.profile', 'video.publish'];
+  // Scopes requested at authorization (each one is shown in the app review demo):
+  // - user.info.basic: open_id, avatar, display name
+  // - user.info.profile: `username`, used as the profile in release URLs
+  // - user.info.stats: follower/following/likes/video counts for analytics()
+  // - video.list: analytics(), postAnalytics(), missing()
+  // - video.publish: creator_info/query, Direct Post init, publish status
+  // Not requested: video.upload (UPLOAD / inbox only, disabled here). TikTok
+  // bundles it with Content Posting API in the portal, but Direct Post
+  // doesn't need it - see UPSTREAM.md "TikTok patches".
+  scopes = [
+    'user.info.basic',
+    'user.info.profile',
+    'user.info.stats',
+    'video.list',
+    'video.publish',
+  ];
   override maxConcurrentJob = 10000;
   dto = TikTokDto;
   editor = 'normal' as const;

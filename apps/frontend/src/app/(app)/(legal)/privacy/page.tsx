@@ -67,6 +67,16 @@ export default function PrivacyPage() {
           which account you are posting to and to link to your published posts.
         </li>
         <li>
+          <strong>user.info.stats</strong>: your follower, following, likes and
+          video counts, shown on the Analytics page of the Service.
+        </li>
+        <li>
+          <strong>video.list</strong>: your recent TikTok videos and their view,
+          like, comment and share counts, shown on the Analytics page and as the
+          statistics of posts you published through the Service, and used to
+          link a published post to its TikTok video.
+        </li>
+        <li>
           <strong>video.publish</strong>: lets the Service publish the videos
           and photos you choose to your TikTok account, with the privacy,
           interaction and disclosure settings you select.
@@ -77,7 +87,9 @@ export default function PrivacyPage() {
         options (for example which audiences are allowed and whether comments,
         Duet or Stitch are enabled) and shows them to you. We store the access
         and refresh tokens TikTok issues, your open ID, display name, username
-        and avatar, and the publish ID and status of posts you publish. We use
+        and avatar, and the publish ID, status and TikTok post ID of posts you
+        publish. Account and video statistics are loaded from TikTok when you
+        open Analytics and kept in a temporary cache for up to one hour. We use
         TikTok data only to provide the Service to you. We do not sell it, use
         it for advertising, or share it with anyone except TikTok itself.
       </p>
@@ -90,6 +102,10 @@ export default function PrivacyPage() {
           your direction (contract);
         </li>
         <li>to show publishing status and errors (contract);</li>
+        <li>
+          to show statistics for your connected accounts and published posts
+          (contract);
+        </li>
         <li>
           to keep the Service secure and prevent abuse (legitimate interest);
         </li>
@@ -122,10 +138,12 @@ export default function PrivacyPage() {
       <ul>
         <li>
           <strong>Disconnecting an account:</strong> when you disconnect a
-          social account in the Service, we delete its access and refresh
-          tokens. You can also revoke access in the platform&apos;s own settings
-          (for TikTok: Settings and privacy &rarr; Security &rarr; Apps and
-          services).
+          social account in the Service, we stop using its access and refresh
+          tokens; they are deleted together with your account. To cut off access
+          right away, revoke the Service in the platform&apos;s own settings (for
+          TikTok: Settings and privacy &rarr; Security &rarr; Apps and
+          services), which makes the stored tokens unusable. You can also email
+          us to have a disconnected account&apos;s data deleted sooner.
         </li>
         <li>
           <strong>Deleting your account:</strong> email{' '}

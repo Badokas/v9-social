@@ -13,7 +13,7 @@ export const V9_LEGAL = {
     );
   },
   contact: 'legal@void9.com',
-  updated: '4 October 2026',
+  updated: '6 October 2026',
 };
 
 export const LegalPage = ({
