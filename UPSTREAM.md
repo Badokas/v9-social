@@ -5,15 +5,16 @@ Branch `v9` = an upstream release tag + a small patch stack on top.
 
 - `origin`   → https://github.com/Badokas/v9-social (default branch `v9`)
 - `upstream` → https://github.com/gitroomhq/postiz-app
-- Current base: `v2.25.0 + 90` (merge-base `git describe` = `v2.25.0-90-gafa30c65`;
-  update this line on every rebase). Upstream's last published *git tag* is
-  `v2.25.0` — there is no `v2.25.1` tag to fetch, so our `-v9.<n>` releases that
-  read `v2.25.1-…` carry a hand-bumped upstream label, not a real upstream tag.
-- Current release tag: `v2.25.1-v9.3` (bump `-v9.<n>` on every build)
-- Patch stack: **24 commits ahead** of `upstream/main`, **45 behind** (as of
-  upstream `91c91f63`, 2026-10-09). Rebasing the stack onto `upstream/main`
-  currently replays with **2 conflicting commits across 4 files** — all known
-  and scripted below under "Known conflict points". Re-measure with
+- Current base: `v2.25.0 + 135` (merge-base `git describe` = `v2.25.0-135-g91c91f63`,
+  i.e. rebased onto `upstream/main` HEAD; update this line on every rebase).
+  Upstream's last published *git tag* is `v2.25.0` — there is no `v2.25.1` tag to
+  fetch, so our `-v9.<n>` releases that read `v2.25.1-…` carry a hand-bumped
+  upstream label, not a real upstream tag.
+- Current release tag: `v2.25.1-v9.4` (bump `-v9.<n>` on every build)
+- Patch stack: **25 commits ahead** of `upstream/main`, **0 behind** (freshly
+  rebased onto upstream `91c91f63`, 2026-10-09). The last rebase replayed with
+  **2 conflicting commits across 4 files** — all known and scripted below under
+  "Known conflict points". Re-measure with
   `git rev-list --left-right --count upstream/main...v9`.
 
 ## Updating to a new upstream release
