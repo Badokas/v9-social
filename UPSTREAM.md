@@ -5,8 +5,16 @@ Branch `v9` = an upstream release tag + a small patch stack on top.
 
 - `origin`   → https://github.com/Badokas/v9-social (default branch `v9`)
 - `upstream` → https://github.com/gitroomhq/postiz-app
-- Current base: `v2.25.0` (update this line on every rebase)
+- Current base: `v2.25.0 + 90` (merge-base `git describe` = `v2.25.0-90-gafa30c65`;
+  update this line on every rebase). Upstream's last published *git tag* is
+  `v2.25.0` — there is no `v2.25.1` tag to fetch, so our `-v9.<n>` releases that
+  read `v2.25.1-…` carry a hand-bumped upstream label, not a real upstream tag.
 - Current release tag: `v2.25.1-v9.3` (bump `-v9.<n>` on every build)
+- Patch stack: **24 commits ahead** of `upstream/main`, **45 behind** (as of
+  upstream `91c91f63`, 2026-10-09). Rebasing the stack onto `upstream/main`
+  currently replays with **2 conflicting commits across 4 files** — all known
+  and scripted below under "Known conflict points". Re-measure with
+  `git rev-list --left-right --count upstream/main...v9`.
 
 ## Updating to a new upstream release
 
@@ -72,9 +80,78 @@ Rules to keep merges cheap:
   `libraries/nestjs-libraries/src/chat/ui/{clipping,upload}.widget.ts`,
   and `.../analytics/chart-social.tsx` (inline `rgba()`).
 
-A test rebase of the full patch stack onto a 19-commit-ahead `upstream/main`
-replayed with zero conflicts, so this convention is working. Re-run the
-dry-run (see "Dry-run the rebase first" above) before any real upgrade.
+The brand-token convention keeps most of the recolor patch rebasing cleanly:
+on the last dry-run (24-commit stack onto `upstream/main`, 45 commits past the
+merge-base), only **2 of 24 commits conflicted**, in **4 files total**, and the
+rebased tree type-checked (`npx tsc -p apps/frontend/tsconfig.json --noEmit`).
+All four conflicts are documented with their resolution under "Known conflict
+points" below. Re-run the dry-run (see "Dry-run the rebase first" above) before
+any real upgrade and update that section if the set changes.
+
+## Known conflict points (scripted resolution)
+
+These are the only spots the dry-run rebase conflicted on. Each is a case where
+upstream edited a line the patch stack also touches. Resolutions below so the
+next upgrade is mechanical; re-check after each sync and prune entries once
+upstream and the patch stack stop colliding.
+
+### 1. `plugs/` and `third-party/` → upstream turned them into redirects
+
+- Commit: `branding: V9 Social logos, titles and Powered by Postiz notice`
+- Files: `apps/frontend/src/app/(app)/(site)/plugs/page.tsx`,
+  `apps/frontend/src/app/(app)/(site)/third-party/page.tsx`
+- Cause: the branding patch set a V9 Social `metadata.title` on these pages.
+  Upstream replaced both page bodies with a bare
+  `redirect('/settings?tab=plugs')` / `redirect('/settings?tab=integrations')`,
+  so the page no longer renders a `<head>` and the `metadata` export is dead.
+- **Resolution: take upstream's version verbatim — drop the fork's `metadata`
+  block and the old component import.** The title no longer renders anywhere;
+  the real settings pages own their own titles. This drops the branding on
+  these two titles permanently (acceptable — users never see a redirect's head).
+
+### 2. `public.component.tsx` → upstream removed the Developers/API sub-tabs
+
+- Commit: `theme: route brand accent through a single Tailwind token`
+- File: `apps/frontend/src/components/public-api/public.component.tsx`
+- Cause: the theme patch is a pure `bg-[#612BD3]` → `bg-brand` recolor across
+  the whole file. Most hunks replay clean. The one conflict is in
+  `PublicComponent`, where the fork's base had an `api`/`developer` sub-tab
+  switcher (`subTab`, `setSubTab`, `<DeveloperComponent/>`) that the recolor
+  patch had recolored; upstream has since **deleted that switcher**, collapsing
+  the body to `<h3>{t('agents','Agents')}</h3><PublicApiContent/>`.
+- **Resolution: take upstream's collapsed body (the HEAD side).** It has no
+  brand literal in that region, so there is nothing to recolor there. Afterwards
+  confirm no stray literal survived elsewhere in the file:
+  `grep -n 612BD3 apps/frontend/src/components/public-api/public.component.tsx`
+  must return nothing (the clean recolor hunks cover the `McpSection`/
+  `CliSection` buttons). Upstream keeps adding `bg-[#612BD3]` buttons here, so
+  if that grep ever finds one, recolor it to `bg-brand` by hand.
+
+### 3. `calendar.tsx` → brand token meets a new upstream class
+
+- Commit: `theme: route brand accent through a single Tailwind token`
+- File: `apps/frontend/src/components/launches/calendar.tsx`
+- Cause: the recolor changed `border border-[#612BD3]` → `border border-brand`
+  on the drag-drop cell; upstream added a sibling
+  `display === 'month' && 'mobile:min-h-[44px]'` class on the adjacent line.
+- **Resolution: keep both — upstream's new `display === 'month'` line *and* the
+  fork's `border border-brand`.** This is the textbook brand-token conflict the
+  convention above warns about: resolve by taking the union, never by reverting
+  to the hex literal.
+
+Procedure for the real rebase, start to finish:
+
+```sh
+git fetch upstream --tags
+git checkout -b rebase-test v9
+git rebase upstream/main
+# conflict 1 (branding): take upstream for plugs/ + third-party/ page.tsx
+# conflict 2+3 (theme):  take upstream body in public.component.tsx;
+#                        union-resolve calendar.tsx (keep new line + border-brand)
+git add <files> && git rebase --continue
+npx tsc -p apps/frontend/tsconfig.json --noEmit     # must exit 0
+git checkout v9 && git branch -D rebase-test        # if only dry-running
+```
 
 ## Temporal worker allowlist (`POSTIZ_ACTIVE_PROVIDERS`)
 
